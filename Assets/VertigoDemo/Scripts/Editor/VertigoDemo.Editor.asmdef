@@ -1,0 +1,7 @@
+{
+  "name": "VertigoDemo.Editor",
+  "rootNamespace": "VertigoDemo.Editor",
+  "references": ["VertigoDemo.Runtime", "Unity.TextMeshPro"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

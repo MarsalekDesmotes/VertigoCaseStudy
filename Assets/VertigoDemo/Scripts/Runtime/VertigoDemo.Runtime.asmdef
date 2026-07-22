@@ -1,0 +1,6 @@
+{
+  "name": "VertigoDemo.Runtime",
+  "rootNamespace": "VertigoDemo",
+  "references": ["Unity.TextMeshPro", "UnityEngine.ScreenCaptureModule"],
+  "autoReferenced": true
+}
