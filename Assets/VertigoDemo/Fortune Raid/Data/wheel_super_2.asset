@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 813c46bc31262b74f8cbef4f971882ee, type: 3}
+  m_Name: wheel_super_2
+  m_EditorClassIdentifier: 
+  zoneType: 2
+  wheelBase: {fileID: 21300000, guid: 517545140a14049499578ee9abc891b5, type: 3}
+  indicator: {fileID: 21300000, guid: 3f3ba52013ae46745b2b44cdf38bfae3, type: 3}
+  slices:
+  - isBomb: 0
+    reward: {fileID: 11400000, guid: 369c68fedd31329438690670c4d68285, type: 2}
+    amountMultiplier: 1
+  - isBomb: 0
+    reward: {fileID: 11400000, guid: 797388b5870b72c449d861d2f20899c7, type: 2}
+    amountMultiplier: 1
+  - isBomb: 0
+    reward: {fileID: 11400000, guid: d68dda1d416a9824a9697298ea4bf16c, type: 2}
+    amountMultiplier: 1
+  - isBomb: 0
+    reward: {fileID: 11400000, guid: 1c4fd64e05a93924c8669404bf5a39ff, type: 2}
+    amountMultiplier: 1
+  - isBomb: 0
+    reward: {fileID: 11400000, guid: 6fad40d440821e94f8c1211664da3bb1, type: 2}
+    amountMultiplier: 1
+  - isBomb: 0
+    reward: {fileID: 11400000, guid: 28519269fa1d7254a970f3bb5081e884, type: 2}
+    amountMultiplier: 1
+  - isBomb: 0
+    reward: {fileID: 11400000, guid: 4231f8d7c052bf547bbe0989f049f283, type: 2}
+    amountMultiplier: 1
+  - isBomb: 0
+    reward: {fileID: 11400000, guid: b1c166a8436514744994bd1df661553f, type: 2}
+    amountMultiplier: 1

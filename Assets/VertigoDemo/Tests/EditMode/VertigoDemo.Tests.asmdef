@@ -1,8 +1,0 @@
-{
-  "name": "VertigoDemo.Tests",
-  "rootNamespace": "VertigoDemo.Tests",
-  "references": ["VertigoDemo.Runtime"],
-  "includePlatforms": ["Editor"],
-  "optionalUnityReferences": ["TestAssemblies"],
-  "autoReferenced": false
-}

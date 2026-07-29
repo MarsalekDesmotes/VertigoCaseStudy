@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 278f8760e7d43dc41922c9f5e2e76335, type: 3}
+  m_Name: wheel_catalog
+  m_EditorClassIdentifier: 
+  normalWheel: {fileID: 11400000, guid: d467459581ffda74da40e586048bae19, type: 2}
+  safeWheel: {fileID: 11400000, guid: 951aa9b7c769247468247edbcd7f3ec6, type: 2}
+  superWheel: {fileID: 11400000, guid: b6a6ae9b5eaeca040b6f2edb84818a5b, type: 2}
+  rotatingSuperWheels:
+  - {fileID: 11400000, guid: b6a6ae9b5eaeca040b6f2edb84818a5b, type: 2}
+  - {fileID: 11400000, guid: 5e5d7af579103f34f83f68837fbc08bd, type: 2}
+  - {fileID: 11400000, guid: 9fbaef105f6a40b48adab479d2779ead, type: 2}
