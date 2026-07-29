@@ -47,3 +47,11 @@ AI was used as a design and documentation partner in two areas:
 
 The final Unity implementation, assets, prefabs, ScriptableObject data, and
 runtime behavior were reviewed and integrated in the project codebase.
+
+## Unity package
+
+`VertigoWheelDemo_NoDOTween.unitypackage` contains the demo assets, scripts,
+prefabs, scene, data, art, atlas, and TMP resources. DOTween is intentionally
+excluded; install/import the DOTween package separately first, then import this
+package into a Unity 2021.3.45f2 project. Open the generated Game scene and
+press Play.
