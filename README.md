@@ -35,9 +35,6 @@ Current reference frames:
 - [20:9 gameplay frame](Delivery/Screenshots/current_game_20x9.png)
 - [4:3 gameplay frame](Delivery/Screenshots/current_game_4x3.png)
 
-`Delivery/GameplayDemo.mp4` is a 21.87-second 1600x900 gameplay capture showing
-two spins, reward popups, accumulated loot, and zone progression.
-
 ## AI usage
 
 AI was used as a design and documentation partner in two areas:
