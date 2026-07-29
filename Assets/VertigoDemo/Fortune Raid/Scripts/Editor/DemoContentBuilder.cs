@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Callbacks;
@@ -276,20 +278,20 @@ namespace VertigoDemo.Editor
             texture.sRGB = true;
             atlas.SetTextureSettings(texture);
 
-            string[] files =
-            {
-                "ui_spin_bronze_base.png", "ui_spin_silver_base.png", "ui_spin_golden_base.png",
-                "ui_spin_bronze_indicator.png", "ui_spin_silver_indicator.png", "ui_spin_golden_indicator.png",
-                "ui_spin_generic_button.png", "UI_button_orange_standard.png", "UI_button_grey_standard.png",
-                "ui_card_frame_12px_neutral.png", "ui_card_frame_4px_zone.png",
-                "ui_card_panel_zone_bg.png",
-                "ui_card_panel_zone_current_white.png", "ui_card_icon_death.png",
-                "star_flash_alpha.png", "star_glow_alpha.png", "ui_vfx_offer_shine.tga"
-            };
-            List<Object> objects = new List<Object>();
+            // keep the atlas aligned with the complete supplied art folder.
+            string[] files = AssetDatabase.FindAssets("", new[] { Art })
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Where(file =>
+                    file.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                    file.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                    file.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                    file.EndsWith(".tga", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(file => file, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            List<UnityEngine.Object> objects = new List<UnityEngine.Object>();
             for (int i = 0; i < files.Length; i++)
             {
-                Object asset = AssetDatabase.LoadMainAssetAtPath(Art + files[i]);
+                UnityEngine.Object asset = AssetDatabase.LoadMainAssetAtPath(files[i]);
                 if (asset != null) objects.Add(asset);
             }
 
