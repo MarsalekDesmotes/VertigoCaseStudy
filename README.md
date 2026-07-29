@@ -29,5 +29,24 @@ The project bootstrap runs automatically after the first clean import. UI screen
 Responsive gameplay captures are included under `Delivery/Screenshots` for the
 required 16:9, 20:9, and 4:3 aspect ratios.
 
+Current reference frames:
+
+- [16:9 gameplay frame](Delivery/Screenshots/current_game_16x9.png)
+- [20:9 gameplay frame](Delivery/Screenshots/current_game_20x9.png)
+- [4:3 gameplay frame](Delivery/Screenshots/current_game_4x3.png)
+
 `Delivery/GameplayDemo.mp4` is a 21.87-second 1600x900 gameplay capture showing
 two spins, reward popups, accumulated loot, and zone progression.
+
+## AI usage
+
+AI was used as a design and documentation partner in two areas:
+
+1. **README creation** — organizing setup, gameplay rules, architecture notes,
+   and delivery references into a reviewer-friendly document.
+2. **UX Strategy Ideas** — suggesting and evaluating interaction flow, reward
+   communication, safe/super-zone readability, bomb feedback, popup sequencing,
+   responsive composition, and visual-polish opportunities.
+
+The final Unity implementation, assets, prefabs, ScriptableObject data, and
+runtime behavior were reviewed and integrated in the project codebase.
