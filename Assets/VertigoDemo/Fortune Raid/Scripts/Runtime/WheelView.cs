@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 namespace VertigoDemo
 {
-    // it spins and presents rewards
     public sealed class WheelView : MonoBehaviour
     {
         [SerializeField] private RectTransform ui_transform_wheel_animator;
@@ -20,17 +19,40 @@ namespace VertigoDemo
         private Tween bombImpactTween;
         private Sequence spinSequence;
         private Sequence zoneRevealTween;
+        private Action pendingComplete;
+        private int boundSliceCount;
 
         public bool IsSpinning { get; private set; }
 
-        public void Bind(WheelDefinition definition, int zone)
+        public void Bind(
+            WheelDefinitionModel definition,
+            int zone,
+            IRewardRules rewardRules)
         {
+            if (!definition.ValidateBombs())
+            {
+                Debug.LogError(
+                    "WheelDefinitionModel bomb invariant failed: " + definition.name,
+                    definition);
+            }
+
+            if (ui_wheel_slices.Count != definition.Slices.Count)
+            {
+                Debug.LogError(
+                    "Wheel prefab slice count (" + ui_wheel_slices.Count +
+                    ") must match WheelDefinitionModel.Slices (" +
+                    definition.Slices.Count + ").",
+                    this);
+                boundSliceCount = 0;
+                return;
+            }
+
+            boundSliceCount = definition.Slices.Count;
             ui_image_wheel_base_value.sprite = definition.WheelBase;
             ui_image_wheel_indicator_value.sprite = definition.Indicator;
-            for (int i = 0; i < ui_wheel_slices.Count; i++)
+            for (int i = 0; i < boundSliceCount; i++)
             {
-                WheelSliceDefinition slice = i < definition.Slices.Count ? definition.Slices[i] : null;
-                ui_wheel_slices[i].Bind(slice, zone);
+                ui_wheel_slices[i].Bind(definition.Slices[i], zone, rewardRules);
             }
 
             KeepSliceContentsUpright();
@@ -69,11 +91,27 @@ namespace VertigoDemo
 
         public void Spin(int selectedIndex, Action onComplete)
         {
-            if (IsSpinning) return;
+            if (IsSpinning)
+            {
+                return;
+            }
+
+            if (boundSliceCount <= 0 ||
+                selectedIndex < 0 ||
+                selectedIndex >= boundSliceCount)
+            {
+                Debug.LogError(
+                    "Spin aborted: invalid slice index " + selectedIndex +
+                    " for bound count " + boundSliceCount + ".",
+                    this);
+                onComplete?.Invoke();
+                return;
+            }
 
             IsSpinning = true;
+            pendingComplete = onComplete;
             ClearSliceFocus();
-            float sliceAngle = 360f / Mathf.Max(1, ui_wheel_slices.Count);
+            float sliceAngle = 360f / boundSliceCount;
             float current = Normalize(ui_transform_wheel_animator.localEulerAngles.z);
             float selectedRotation = Normalize(selectedIndex * sliceAngle);
             float clockwiseAlignment = Mathf.Repeat(current - selectedRotation, 360f);
@@ -101,10 +139,9 @@ namespace VertigoDemo
                     ui_transform_wheel_animator.localRotation =
                         Quaternion.Euler(0f, 0f, Normalize(target));
                     KeepSliceContentsUpright();
-                    IsSpinning = false;
                     spinTween = null;
                     spinSequence = null;
-                    PulseSelectedSlice(selectedIndex, onComplete);
+                    PulseSelectedSlice(selectedIndex, CompleteSpin);
                 });
         }
 
@@ -112,7 +149,7 @@ namespace VertigoDemo
         {
             float counterRotation = -ui_transform_wheel_animator.localEulerAngles.z;
             Quaternion uprightRotation = Quaternion.Euler(0f, 0f, counterRotation);
-            for (int i = 0; i < ui_wheel_slices.Count; i++)
+            for (int i = 0; i < boundSliceCount; i++)
             {
                 ui_wheel_slices[i].Animator.localRotation = uprightRotation;
             }
@@ -120,12 +157,10 @@ namespace VertigoDemo
 
         private void PulseSelectedSlice(int selectedIndex, Action onComplete)
         {
-            if (selectedIndex < 0 || selectedIndex >= ui_wheel_slices.Count)
-            {
-                onComplete?.Invoke();
-                return;
-            }
-            for (int i = 0; i < ui_wheel_slices.Count; i++)
+            Debug.Assert(
+                selectedIndex >= 0 && selectedIndex < boundSliceCount,
+                "PulseSelectedSlice index out of bound slice range.");
+            for (int i = 0; i < boundSliceCount; i++)
             {
                 ui_wheel_slices[i].SetFocus(i == selectedIndex, true);
             }
@@ -144,13 +179,13 @@ namespace VertigoDemo
                 .OnComplete(() =>
                 {
                     selectedSliceTween = null;
-                    onComplete?.Invoke();
+                    onComplete();
                 });
         }
 
         private void ClearSliceFocus()
         {
-            for (int i = 0; i < ui_wheel_slices.Count; i++)
+            for (int i = 0; i < boundSliceCount; i++)
             {
                 ui_wheel_slices[i].SetFocus(false, false);
             }
@@ -202,6 +237,14 @@ namespace VertigoDemo
             return (angle % 360f + 360f) % 360f;
         }
 
+        private void CompleteSpin()
+        {
+            IsSpinning = false;
+            Action callback = pendingComplete;
+            pendingComplete = null;
+            callback();
+        }
+
         private void OnDisable()
         {
             spinTween.Kill(false);
@@ -214,7 +257,10 @@ namespace VertigoDemo
             selectedSliceTween = null;
             bombImpactTween = null;
             zoneRevealTween = null;
-            IsSpinning = false;
+            if (IsSpinning)
+            {
+                CompleteSpin();
+            }
         }
 
     }

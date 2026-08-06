@@ -1,31 +1,51 @@
+using UnityEngine;
+
 namespace VertigoDemo
 {
-    public static class ZoneRules
+    public sealed class ZoneRules : IZoneRules
     {
-        public static ZoneType GetZoneType(int zone)
-        {
-            if (zone <= 0)
-            {
-                return ZoneType.Normal;
-            }
+        private static readonly ZoneProfile Normal = new ZoneProfile(
+            ZoneType.Normal,
+            LocalizationKeys.ZoneRisk,
+            new Color(1f, 0.46f, 0.2f),
+            canCashOut: false,
+            hasEntranceTransition: false,
+            ZoneTrailStyle.Coming);
 
+        private static readonly ZoneProfile Safe = new ZoneProfile(
+            ZoneType.Safe,
+            LocalizationKeys.ZoneSafe,
+            new Color(0.52f, 0.84f, 1f),
+            canCashOut: true,
+            hasEntranceTransition: false,
+            ZoneTrailStyle.Safe);
+
+        private static readonly ZoneProfile Golden = new ZoneProfile(
+            ZoneType.Golden,
+            LocalizationKeys.ZoneGolden,
+            new Color(1f, 0.78f, 0.12f),
+            canCashOut: true,
+            hasEntranceTransition: true,
+            ZoneTrailStyle.Golden);
+
+        public ZoneProfile GetProfile(int zone)
+        {
             if (zone % 30 == 0)
             {
-                return ZoneType.Super;
+                return Golden;
             }
 
-            return zone % 5 == 0 ? ZoneType.Safe : ZoneType.Normal;
+            return zone % 5 == 0 ? Safe : Normal;
         }
 
-        public static bool CanLeave(int zone, bool isSpinning)
+        public bool CanLeave(int zone, bool isBusy)
         {
-            if (isSpinning)
+            if (isBusy)
             {
                 return false;
             }
 
-            ZoneType type = GetZoneType(zone);
-            return type == ZoneType.Safe || type == ZoneType.Super;
+            return GetProfile(zone).CanCashOut;
         }
     }
 }

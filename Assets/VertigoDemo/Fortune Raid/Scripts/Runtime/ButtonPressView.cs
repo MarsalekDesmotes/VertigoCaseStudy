@@ -36,11 +36,11 @@ namespace VertigoDemo
         private void AnimateTo(float scale, float duration, Ease ease)
         {
             pressTween.Kill(false);
-            pressTween = ui_transform_button_animator
-                .DOScale(new Vector3(scale, scale, 1f), duration)
-                .SetEase(ease)
-                .SetUpdate(true)
-                .SetTarget(ui_transform_button_animator);
+            pressTween = UiTween.Scale(
+                ui_transform_button_animator,
+                new Vector3(scale, scale, 1f),
+                duration,
+                ease);
         }
 
         private void OnDisable()
@@ -49,6 +49,5 @@ namespace VertigoDemo
             pressTween = null;
             ui_transform_button_animator.localScale = Vector3.one;
         }
-
     }
 }

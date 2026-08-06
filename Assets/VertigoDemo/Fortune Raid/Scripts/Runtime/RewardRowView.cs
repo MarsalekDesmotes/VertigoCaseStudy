@@ -14,16 +14,16 @@ namespace VertigoDemo
 
         private Tween revealTween;
         private Tween amountTween;
-        private RewardDefinition boundDefinition;
+        private RewardDefinitionModel boundDefinition;
         private int displayedAmount;
 
-        public RewardDefinition Definition { get { return boundDefinition; } }
+        public RewardDefinitionModel Definition { get { return boundDefinition; } }
         public RectTransform FlightTarget { get { return ui_image_collected_reward_value.rectTransform; } }
 
-        public void Bind(CollectedReward reward)
+        public void Bind(CollectedRewardModel reward)
         {
             bool shouldReveal = reward != null && !gameObject.activeSelf;
-            RewardDefinition previousDefinition = boundDefinition;
+            RewardDefinitionModel previousDefinition = boundDefinition;
             int previousAmount = displayedAmount;
             gameObject.SetActive(reward != null);
             if (reward == null)

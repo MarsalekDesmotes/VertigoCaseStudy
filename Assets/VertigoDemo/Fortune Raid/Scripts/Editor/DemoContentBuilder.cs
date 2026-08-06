@@ -1,21 +1,16 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TMPro;
 using UnityEditor;
-using UnityEditor.Callbacks;
 using UnityEditor.SceneManagement;
+using UnityEditor.U2D;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.U2D;
-using UnityEditor.U2D;
 
 namespace VertigoDemo.Editor
 {
-    [InitializeOnLoad]
-    // it builds the demo content
     public static partial class DemoContentBuilder
     {
         private const string Root = "Assets/VertigoDemo/Fortune Raid";
@@ -25,41 +20,6 @@ namespace VertigoDemo.Editor
         private const string Scenes = Root + "/Scenes";
         private const string GameScenePath = Scenes + "/Game.unity";
         private const string GamePrefabPath = Prefabs + "/ui_screen_game.prefab";
-
-        [DidReloadScripts]
-        private static void QueueContentBuild()
-        {
-            EditorApplication.delayCall += BuildOnFirstImport;
-        }
-
-        private static void BuildOnFirstImport()
-        {
-            if (!EditorApplication.isPlayingOrWillChangePlaymode && NeedsContentRebuild())
-            {
-                BuildAll();
-            }
-        }
-
-        private static bool NeedsContentRebuild()
-        {
-            if (!File.Exists(GameScenePath))
-            {
-                return true;
-            }
-
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(GamePrefabPath);
-            if (prefab == null)
-            {
-                return true;
-            }
-
-            return
-                prefab.GetComponentInChildren<ResultPopupView>(true) == null ||
-                prefab.GetComponentInChildren<BombPopupView>(true) == null ||
-                prefab.GetComponentInChildren<RunLootPanelView>(true) == null ||
-                prefab.GetComponentInChildren<ZoneTrailView>(true) == null ||
-                prefab.GetComponentInChildren<GoldenTransitionView>(true) == null;
-        }
 
         [MenuItem("Vertigo Demo/Rebuild Demo Content")]
         public static void BuildAll()
@@ -94,7 +54,7 @@ namespace VertigoDemo.Editor
                 throw new System.InvalidOperationException("TextMeshPro essentials could not be imported.");
             }
 
-            WheelCatalog catalog = BuildData();
+            WheelCatalogModel catalog = BuildData();
             BuildCoreSpriteAtlas();
             GameObject prefab = BuildGamePrefab(catalog);
             BuildScene(prefab);
@@ -104,137 +64,137 @@ namespace VertigoDemo.Editor
             Debug.Log("Vertigo Demo content rebuilt successfully.");
         }
 
-        private static WheelCatalog BuildData()
+        private static WheelCatalogModel BuildData()
         {
-            RewardDefinition bomb = Reward("reward_bomb", "Bomb", "ui_card_icon_death.png", 1);
-            RewardDefinition gold = Reward("reward_gold", "Gold", "UI_icon_gold.png", 100);
-            RewardDefinition cash = Reward("reward_cash", "Cash", "UI_icon_cash.png", 250);
-            RewardDefinition pistol = Reward("reward_pistol", "Pistol Points", "UI_Icons_Pistol_Points.png", 10);
-            RewardDefinition rifle = Reward("reward_rifle", "Rifle Points", "UI_Icons_Rifle_Points.png", 10);
-            RewardDefinition sniper = Reward("reward_sniper", "Sniper Points", "UI_Icons_Sniper_Points.png", 10);
-            RewardDefinition armor = Reward("reward_armor", "Armor Points", "UI_Icons_Armor_Points.png", 15);
-            RewardDefinition grenade = Reward("reward_grenade", "M67 Grenade", "ui_icon_render_cons_grenade_m67.png", 1);
-            RewardDefinition stimulant = Reward("reward_stimulant", "Neurostim", "ui_icon_render_cons_healthshot_2_neurostim.png", 1);
-            RewardDefinition shotgun = Reward(
+            RewardDefinitionModel bomb = Reward("reward_bomb", "Bomb", "ui_card_icon_death.png", 1);
+            RewardDefinitionModel gold = Reward("reward_gold", "Gold", "UI_icon_gold.png", 100);
+            RewardDefinitionModel cash = Reward("reward_cash", "Cash", "UI_icon_cash.png", 250);
+            RewardDefinitionModel pistol = Reward("reward_pistol", "Pistol Points", "UI_Icons_Pistol_Points.png", 10);
+            RewardDefinitionModel rifle = Reward("reward_rifle", "Rifle Points", "UI_Icons_Rifle_Points.png", 10);
+            RewardDefinitionModel sniper = Reward("reward_sniper", "Sniper Points", "UI_Icons_Sniper_Points.png", 10);
+            RewardDefinitionModel armor = Reward("reward_armor", "Armor Points", "UI_Icons_Armor_Points.png", 15);
+            RewardDefinitionModel grenade = Reward("reward_grenade", "M67 Grenade", "ui_icon_render_cons_grenade_m67.png", 1);
+            RewardDefinitionModel stimulant = Reward("reward_stimulant", "Neurostim", "ui_icon_render_cons_healthshot_2_neurostim.png", 1);
+            RewardDefinitionModel shotgun = Reward(
                 "reward_shotgun", "Shotgun", "UI_Icon_Renders_tier3_shotgun.png", 1, stackable: false);
-            RewardDefinition smg = Reward(
+            RewardDefinitionModel smg = Reward(
                 "reward_smg", "SMG", "UI_Icon_Renders_tier3_smg.png", 1, stackable: false);
-            RewardDefinition chest = Reward(
+            RewardDefinitionModel chest = Reward(
                 "reward_chest", "Super Chest", "UI_icon_chest_super_nolight.png", 1,
                 special: true, stackable: false);
-            RewardDefinition bronzeChest = Reward(
+            RewardDefinitionModel bronzeChest = Reward(
                 "reward_special_chest_bronze", "Bronze Chest", "UI_icon_chest_Bronze_nolight.png", 1,
                 special: true, stackable: false);
-            RewardDefinition silverChest = Reward(
+            RewardDefinitionModel silverChest = Reward(
                 "reward_special_chest_silver", "Silver Chest", "UI_icon_chest_silver_nolight.png", 1,
                 special: true, stackable: false);
-            RewardDefinition smallChest = Reward(
+            RewardDefinitionModel smallChest = Reward(
                 "reward_special_chest_small", "Small Chest", "UI_icon_chest_small_noligt.png", 1,
                 special: true, stackable: false);
-            RewardDefinition standardChest = Reward(
+            RewardDefinitionModel standardChest = Reward(
                 "reward_special_chest_standard", "Standard Chest", "UI_icon_chest_standart_nolight.png", 1,
                 special: true, stackable: false);
-            RewardDefinition bigChest = Reward(
+            RewardDefinitionModel bigChest = Reward(
                 "reward_special_chest_big", "Big Chest", "UI_icon_chest_big_nolight.png", 1,
                 special: true, stackable: false);
-            RewardDefinition pumpkinHelmet = Reward(
+            RewardDefinitionModel pumpkinHelmet = Reward(
                 "reward_special_pumpkin_helmet", "Pumpkin Helmet", "ui_icon_helmet_pumpkin.png", 1,
                 special: true, stackable: false);
-            RewardDefinition aviatorGlasses = Reward(
+            RewardDefinitionModel aviatorGlasses = Reward(
                 "reward_special_aviator_glasses", "Aviator Glasses", "ui_icon_aviator_glasses_easter.png", 1,
                 special: true, stackable: false);
-            RewardDefinition baseballCap = Reward(
+            RewardDefinitionModel baseballCap = Reward(
                 "reward_special_baseball_cap", "Baseball Cap", "ui_icon_baseball_cap_easter.png", 1,
                 special: true, stackable: false);
-            RewardDefinition easterBayonet = Reward(
+            RewardDefinitionModel easterBayonet = Reward(
                 "reward_special_easter_bayonet", "Easter Bayonet", "ui_icon_mle_bayonet_easter_time.png", 1,
                 special: true, stackable: false);
-            RewardDefinition summerBayonet = Reward(
+            RewardDefinitionModel summerBayonet = Reward(
                 "reward_special_summer_bayonet", "Summer Bayonet", "ui_icon_mle_bayonet_summer_vice.png", 1,
                 special: true, stackable: false);
-            RewardDefinition molotov = Reward(
+            RewardDefinitionModel molotov = Reward(
                 "reward_special_molotov", "Molotov", "ui_icon_render_t_cons_molotov.png", 1, true);
-            RewardDefinition grenadeM26 = Reward(
+            RewardDefinitionModel grenadeM26 = Reward(
                 "reward_special_grenade_m26", "M26 Grenade", "ui_icon_render_cons_grenade_m26.png", 1, true);
-            RewardDefinition regenerator = Reward(
+            RewardDefinitionModel regenerator = Reward(
                 "reward_special_regenerator", "Regenerator", "ui_icon_render_cons_healthshot_2_regenerator.png", 1, true);
-            RewardDefinition tier1Shotgun = Reward(
+            RewardDefinitionModel tier1Shotgun = Reward(
                 "reward_special_tier1_shotgun", "Tier 1 Shotgun", "UI_Icon_Renders_tier1_shotgun.png", 1,
                 special: true, stackable: false);
-            RewardDefinition tier2Mle = Reward(
+            RewardDefinitionModel tier2Mle = Reward(
                 "reward_special_tier2_mle", "Tier 2 MLE", "UI_Icon_Renders_tier2_mle.png", 1,
                 special: true, stackable: false);
-            RewardDefinition tier2Rifle = Reward(
+            RewardDefinitionModel tier2Rifle = Reward(
                 "reward_special_tier2_rifle", "Tier 2 Rifle", "UI_Icon_Renders_tier2_rifle.png", 1,
                 special: true, stackable: false);
-            RewardDefinition tier3Sniper = Reward(
+            RewardDefinitionModel tier3Sniper = Reward(
                 "reward_special_tier3_sniper", "Tier 3 Sniper", "UI_Icon_Renders_tier3_sniper.png", 1,
                 special: true, stackable: false);
-            RewardDefinition knifePoints = Reward(
+            RewardDefinitionModel knifePoints = Reward(
                 "reward_special_knife_points", "Knife Points", "UI_Icons_Knife_Points.png", 20, true);
-            RewardDefinition pistolPointsPlus = Reward(
+            RewardDefinitionModel pistolPointsPlus = Reward(
                 "reward_special_pistol_points", "Pistol Points+", "UI_Icons_Pistol_Points_.png", 20, true);
-            RewardDefinition shotgunPoints = Reward(
+            RewardDefinitionModel shotgunPoints = Reward(
                 "reward_special_shotgun_points", "Shotgun Points", "UI_Icons_Shotgun_Points.png", 20, true);
-            RewardDefinition smgPoints = Reward(
+            RewardDefinitionModel smgPoints = Reward(
                 "reward_special_smg_points", "SMG Points", "UI_Icons_SMG_Points.png", 20, true);
-            RewardDefinition submachinePoints = Reward(
+            RewardDefinitionModel submachinePoints = Reward(
                 "reward_special_submachine_points", "Submachine Points", "UI_Icons_Submachine_Points.png", 20, true);
-            RewardDefinition vestPoints = Reward(
+            RewardDefinitionModel vestPoints = Reward(
                 "reward_special_vest_points", "Vest Points", "UI_Icons_Vest_Points.png", 20, true);
 
-            WheelDefinition normal = Wheel(
+            WheelDefinitionModel normal = Wheel(
                 "wheel_normal",
                 ZoneType.Normal,
                 "ui_spin_bronze_base.png",
                 "ui_spin_bronze_indicator.png",
-                new List<WheelSliceDefinition>
+                new List<WheelSliceDefinitionModel>
                 {
                     Slice(gold, 1), Slice(pistol, 1), Slice(rifle, 1), Slice(armor, 1),
                     Slice(cash, 1), Slice(grenade, 1), Slice(stimulant, 1), Bomb(bomb)
                 });
 
-            WheelDefinition safe = Wheel(
+            WheelDefinitionModel safe = Wheel(
                 "wheel_safe",
                 ZoneType.Safe,
                 "ui_spin_silver_base.png",
                 "ui_spin_silver_indicator.png",
-                new List<WheelSliceDefinition>
+                new List<WheelSliceDefinitionModel>
                 {
                     Slice(gold, 2), Slice(pistol, 2), Slice(rifle, 2), Slice(sniper, 2),
                     Slice(cash, 2), Slice(grenade, 2), Slice(stimulant, 2), Slice(armor, 2)
                 });
 
-            WheelDefinition superOne = Wheel(
+            WheelDefinitionModel superOne = Wheel(
                 "wheel_super",
-                ZoneType.Super,
+                ZoneType.Golden,
                 "ui_spin_golden_base.png",
                 "ui_spin_golden_indicator.png",
-                new List<WheelSliceDefinition>
+                new List<WheelSliceDefinitionModel>
                 {
                     Slice(pumpkinHelmet, 1), Slice(aviatorGlasses, 1),
                     Slice(baseballCap, 1), Slice(easterBayonet, 1),
                     Slice(summerBayonet, 1), Slice(molotov, 1),
                     Slice(grenadeM26, 1), Slice(regenerator, 1)
                 });
-            WheelDefinition superTwo = Wheel(
+            WheelDefinitionModel superTwo = Wheel(
                 "wheel_super_2",
-                ZoneType.Super,
+                ZoneType.Golden,
                 "ui_spin_golden_base.png",
                 "ui_spin_golden_indicator.png",
-                new List<WheelSliceDefinition>
+                new List<WheelSliceDefinitionModel>
                 {
                     Slice(tier1Shotgun, 1), Slice(tier2Mle, 1),
                     Slice(tier2Rifle, 1), Slice(tier3Sniper, 1),
                     Slice(knifePoints, 1), Slice(shotgunPoints, 1),
                     Slice(smgPoints, 1), Slice(vestPoints, 1)
                 });
-            WheelDefinition superThree = Wheel(
+            WheelDefinitionModel superThree = Wheel(
                 "wheel_super_3",
-                ZoneType.Super,
+                ZoneType.Golden,
                 "ui_spin_golden_base.png",
                 "ui_spin_golden_indicator.png",
-                new List<WheelSliceDefinition>
+                new List<WheelSliceDefinitionModel>
                 {
                     Slice(bronzeChest, 1), Slice(silverChest, 1),
                     Slice(smallChest, 1), Slice(standardChest, 1),
@@ -243,16 +203,16 @@ namespace VertigoDemo.Editor
                 });
 
             string path = Data + "/wheel_catalog.asset";
-            WheelCatalog catalog = AssetDatabase.LoadAssetAtPath<WheelCatalog>(path);
+            WheelCatalogModel catalog = AssetDatabase.LoadAssetAtPath<WheelCatalogModel>(path);
             if (catalog == null)
             {
-                catalog = ScriptableObject.CreateInstance<WheelCatalog>();
+                catalog = ScriptableObject.CreateInstance<WheelCatalogModel>();
                 AssetDatabase.CreateAsset(catalog, path);
             }
             catalog.EditorConfigure(
                 normal,
                 safe,
-                new List<WheelDefinition> { superOne, superTwo, superThree });
+                new List<WheelDefinitionModel> { superOne, superTwo, superThree });
             EditorUtility.SetDirty(catalog);
             return catalog;
         }
@@ -300,7 +260,7 @@ namespace VertigoDemo.Editor
             EditorUtility.SetDirty(atlas);
         }
 
-        private static RewardDefinition Reward(
+        private static RewardDefinitionModel Reward(
             string id,
             string title,
             string iconFile,
@@ -309,10 +269,10 @@ namespace VertigoDemo.Editor
             bool stackable = true)
         {
             string path = Data + "/" + id + ".asset";
-            RewardDefinition reward = AssetDatabase.LoadAssetAtPath<RewardDefinition>(path);
+            RewardDefinitionModel reward = AssetDatabase.LoadAssetAtPath<RewardDefinitionModel>(path);
             if (reward == null)
             {
-                reward = ScriptableObject.CreateInstance<RewardDefinition>();
+                reward = ScriptableObject.CreateInstance<RewardDefinitionModel>();
                 AssetDatabase.CreateAsset(reward, path);
             }
             reward.EditorConfigure(id, title, Sprite(iconFile), amount, special, stackable);
@@ -320,18 +280,18 @@ namespace VertigoDemo.Editor
             return reward;
         }
 
-        private static WheelDefinition Wheel(
+        private static WheelDefinitionModel Wheel(
             string id,
             ZoneType type,
             string baseFile,
             string indicatorFile,
-            List<WheelSliceDefinition> slices)
+            List<WheelSliceDefinitionModel> slices)
         {
             string path = Data + "/" + id + ".asset";
-            WheelDefinition wheel = AssetDatabase.LoadAssetAtPath<WheelDefinition>(path);
+            WheelDefinitionModel wheel = AssetDatabase.LoadAssetAtPath<WheelDefinitionModel>(path);
             if (wheel == null)
             {
-                wheel = ScriptableObject.CreateInstance<WheelDefinition>();
+                wheel = ScriptableObject.CreateInstance<WheelDefinitionModel>();
                 AssetDatabase.CreateAsset(wheel, path);
             }
             wheel.EditorConfigure(type, Sprite(baseFile), Sprite(indicatorFile), slices);
@@ -339,14 +299,14 @@ namespace VertigoDemo.Editor
             return wheel;
         }
 
-        private static WheelSliceDefinition Slice(RewardDefinition reward, int multiplier)
+        private static WheelSliceDefinitionModel Slice(RewardDefinitionModel reward, int multiplier)
         {
-            return new WheelSliceDefinition(false, reward, multiplier);
+            return new WheelSliceDefinitionModel(false, reward, multiplier);
         }
 
-        private static WheelSliceDefinition Bomb(RewardDefinition reward)
+        private static WheelSliceDefinitionModel Bomb(RewardDefinitionModel reward)
         {
-            return new WheelSliceDefinition(true, reward, 1);
+            return new WheelSliceDefinitionModel(true, reward, 1);
         }
 
         private static void BuildScene(GameObject prefab)

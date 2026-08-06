@@ -13,7 +13,7 @@ namespace VertigoDemo
 
         private int lastBoundRewardCount;
 
-        public void Bind(IReadOnlyList<CollectedReward> rewards)
+        public void Bind(IReadOnlyList<CollectedRewardModel> rewards)
         {
             int rewardCount = rewards.Count;
             bool addedRewardType = rewardCount > lastBoundRewardCount;
@@ -28,7 +28,7 @@ namespace VertigoDemo
             lastBoundRewardCount = rewardCount;
         }
 
-        public RectTransform FindFlightTarget(RewardDefinition reward)
+        public RectTransform FindFlightTarget(RewardDefinitionModel reward)
         {
             for (int i = 0; i < ui_reward_rows.Count; i++)
             {

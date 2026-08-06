@@ -23,10 +23,10 @@ namespace VertigoDemo.Editor
             cardContent.gameObject.AddComponent<RectMask2D>();
             cardGlow = DemoUiFactory.Image("ui_image_result_card_glow_value", cardContent, Sprite("star_flash_alpha.png"), new Color(0.92f, 0.04f, 0.02f, 0.34f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(376f, 376f), raycast: false, preserveAspect: true);
             ((MaskableGraphic)cardGlow).maskable = true;
-            PopupSunrayView cardSunrayView = cardGlow.gameObject.AddComponent<PopupSunrayView>();
+            LoopFxView cardSunrayView = cardGlow.gameObject.AddComponent<LoopFxView>();
             SerializedObject cardSunraySo = new SerializedObject(cardSunrayView);
-            Set(cardSunraySo, "ui_transform_sunray_animator", cardGlow.rectTransform);
-            Set(cardSunraySo, "ui_image_sunray_value", cardGlow);
+            Set(cardSunraySo, "ui_transform_rotate_value", cardGlow.rectTransform);
+            Set(cardSunraySo, "ui_image_pulse_value", cardGlow);
             cardSunraySo.FindProperty("rotationSpeedDegrees").floatValue = 8f;
             cardSunraySo.FindProperty("minimumAlpha").floatValue = 0.28f;
             cardSunraySo.FindProperty("maximumAlpha").floatValue = 0.46f;

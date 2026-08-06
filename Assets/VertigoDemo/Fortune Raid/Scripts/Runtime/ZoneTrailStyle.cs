@@ -1,8 +1,8 @@
 namespace VertigoDemo
 {
-    public enum ZoneType
+    public enum ZoneTrailStyle
     {
-        Normal,
+        Coming,
         Safe,
         Golden
     }

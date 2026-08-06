@@ -22,18 +22,15 @@ namespace VertigoDemo
 
         public RectTransform Animator { get { return ui_transform_reward_animator; } }
 
-        public void Bind(WheelSliceDefinition definition, int zone)
+        public void Bind(
+            WheelSliceDefinitionModel definition,
+            int zone,
+            IRewardRules rewardRules)
         {
-            if (definition == null)
-            {
-                gameObject.SetActive(false);
-                return;
-            }
-
             gameObject.SetActive(true);
             SetFocus(false, false, true);
             ResetGlow();
-            RewardDefinition reward = definition.Reward;
+            RewardDefinitionModel reward = definition.Reward;
             ui_image_reward_value.sprite = reward.Icon;
             ui_image_reward_value.preserveAspect = true;
             SetSpecialEffect(reward.IsSpecial);
@@ -42,7 +39,7 @@ namespace VertigoDemo
             iconRect.localScale = definition.IsBomb
                 ? new Vector3(1.22f, 1.22f, 1f)
                 : Vector3.one;
-            int amount = CalculateAmount(definition, zone);
+            int amount = rewardRules.CalculateAmount(definition, zone);
             ui_text_amount_value.text = definition.IsBomb ? string.Empty : "x" + amount;
         }
 
@@ -56,22 +53,13 @@ namespace VertigoDemo
             winGlowTween = DOTween.Sequence()
                 .SetUpdate(true)
                 .SetTarget(ui_image_reward_glow_value)
-                .Append(DOTween.To(
-                    () => ui_image_reward_glow_value.color.a,
-                    SetGlowAlpha,
-                    0.72f,
-                    0.12f))
-                .Join(glowTransform
-                    .DOScale(new Vector3(1.34f, 1.34f, 1f), 0.28f)
-                    .SetEase(Ease.OutQuad))
+                .Append(UiTween.FadeAlpha(ui_image_reward_glow_value, 0.72f, 0.12f))
+                .Join(UiTween.Scale(glowTransform, new Vector3(1.34f, 1.34f, 1f), 0.28f))
                 .Join(glowTransform
                     .DOLocalRotate(new Vector3(0f, 0f, 55f), 0.34f)
-                    .SetEase(Ease.OutCubic))
-                .Append(DOTween.To(
-                    () => ui_image_reward_glow_value.color.a,
-                    SetGlowAlpha,
-                    0f,
-                    0.30f));
+                    .SetEase(Ease.OutCubic)
+                    .SetUpdate(true))
+                .Append(UiTween.FadeAlpha(ui_image_reward_glow_value, 0f, 0.30f));
         }
 
         public void SetFocus(bool selected, bool hasSelection, bool immediate = false)
@@ -85,14 +73,7 @@ namespace VertigoDemo
                 return;
             }
 
-            focusTween = DOTween.To(
-                    () => ui_canvas_group_slice.alpha,
-                    value => ui_canvas_group_slice.alpha = value,
-                    targetAlpha,
-                    0.18f)
-                .SetEase(Ease.OutQuad)
-                .SetUpdate(true)
-                .SetTarget(ui_canvas_group_slice);
+            focusTween = UiTween.Fade(ui_canvas_group_slice, targetAlpha, 0.18f);
         }
 
         private void SetSpecialEffect(bool active)
@@ -114,58 +95,17 @@ namespace VertigoDemo
             SetSpecialShineAlpha(0.18f);
             SetSpecialSparkleAlpha(0.42f);
 
-            specialRotationTween = shine
-                .DOLocalRotate(new Vector3(0f, 0f, 360f), 5.2f, RotateMode.FastBeyond360)
-                .SetEase(Ease.Linear)
-                .SetLoops(-1, LoopType.Restart)
-                .SetUpdate(true)
-                .SetTarget(ui_image_special_shine_value);
+            specialRotationTween = UiTween.LoopRotate(shine, 5.2f);
             specialPulseTween = DOTween.Sequence()
                 .SetUpdate(true)
                 .SetTarget(ui_image_special_sparkle_value)
-                .Append(sparkle
-                    .DOScale(new Vector3(1.12f, 1.12f, 1f), 0.72f)
-                    .SetEase(Ease.InOutSine))
-                .Join(DOTween.To(
-                    () => ui_image_special_sparkle_value.color.a,
-                    SetSpecialSparkleAlpha,
-                    0.92f,
-                    0.72f))
-                .Join(DOTween.To(
-                    () => ui_image_special_shine_value.color.a,
-                    SetSpecialShineAlpha,
-                    0.34f,
-                    0.72f))
-                .Append(sparkle
-                    .DOScale(new Vector3(0.72f, 0.72f, 1f), 0.72f)
-                    .SetEase(Ease.InOutSine))
-                .Join(DOTween.To(
-                    () => ui_image_special_sparkle_value.color.a,
-                    SetSpecialSparkleAlpha,
-                    0.42f,
-                    0.72f))
-                .Join(DOTween.To(
-                    () => ui_image_special_shine_value.color.a,
-                    SetSpecialShineAlpha,
-                    0.18f,
-                    0.72f))
+                .Append(UiTween.Scale(sparkle, new Vector3(1.12f, 1.12f, 1f), 0.72f, Ease.InOutSine))
+                .Join(UiTween.FadeAlpha(ui_image_special_sparkle_value, 0.92f, 0.72f, Ease.InOutSine))
+                .Join(UiTween.FadeAlpha(ui_image_special_shine_value, 0.34f, 0.72f, Ease.InOutSine))
+                .Append(UiTween.Scale(sparkle, new Vector3(0.72f, 0.72f, 1f), 0.72f, Ease.InOutSine))
+                .Join(UiTween.FadeAlpha(ui_image_special_sparkle_value, 0.42f, 0.72f, Ease.InOutSine))
+                .Join(UiTween.FadeAlpha(ui_image_special_shine_value, 0.18f, 0.72f, Ease.InOutSine))
                 .SetLoops(-1, LoopType.Restart);
-        }
-
-        public static int CalculateAmount(WheelSliceDefinition definition, int zone)
-        {
-            if (definition == null || definition.IsBomb)
-            {
-                return 0;
-            }
-
-            if (!definition.Reward.IsStackable)
-            {
-                return definition.Reward.BaseAmount;
-            }
-
-            int progression = Mathf.Max(1, zone);
-            return definition.Reward.BaseAmount * definition.AmountMultiplier * progression;
         }
 
         private void OnDisable()

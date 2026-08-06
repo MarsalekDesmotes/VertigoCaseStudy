@@ -3,7 +3,7 @@ using UnityEngine;
 namespace VertigoDemo
 {
     [CreateAssetMenu(menuName = "Vertigo Demo/Reward", fileName = "reward_")]
-    public sealed class RewardDefinition : ScriptableObject
+    public sealed class RewardDefinitionModel : ScriptableObject
     {
         [SerializeField] private string id = "reward";
         [SerializeField] private string displayName = "Reward";

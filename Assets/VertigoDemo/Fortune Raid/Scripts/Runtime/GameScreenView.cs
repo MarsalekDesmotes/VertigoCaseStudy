@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace VertigoDemo
 {
-    // it binds the main screen
-    public sealed class GameScreenView : MonoBehaviour
+    public sealed class GameScreenView : MonoBehaviour, IWheelScreenView, IPopup
     {
         [Header("Core")]
         [SerializeField] private WheelView ui_wheel_view;
@@ -18,20 +18,35 @@ namespace VertigoDemo
         [SerializeField] private Button ui_button_leave;
 
         [Header("Sections")]
-        [SerializeField] private ResultPopupView ui_result_popup_view;
-        [SerializeField] private BombPopupView ui_bomb_popup_view;
+        [FormerlySerializedAs("ui_result_popup_view")]
+        [SerializeField] private PopupView ui_popup_view;
         [SerializeField] private RunLootPanelView ui_run_loot_panel_view;
         [SerializeField] private ZoneTrailView ui_zone_trail_view;
         [SerializeField] private GoldenTransitionView ui_golden_transition_view;
 
+        private ILocalization localization;
+        private IZoneRules zoneRules;
+        private IRewardRules rewardRules;
         private bool leaveWasAvailable;
-        private bool requestedSpinning;
+        private bool requestedBusy;
         private bool requestedCanLeave;
         private int lastBoundZone = -1;
 
-        public WheelView Wheel => ui_wheel_view;
+        public bool IsWheelSpinning { get { return ui_wheel_view.IsSpinning; } }
         public event Action SpinPressed;
         public event Action LeavePressed;
+
+        public void Configure(
+            ILocalization localizationService,
+            IZoneRules zoneRulesService,
+            IRewardRules rewardRulesService)
+        {
+            localization = localizationService;
+            zoneRules = zoneRulesService;
+            rewardRules = rewardRulesService;
+            ui_popup_view.Configure(localization);
+            ui_golden_transition_view.Configure(localization);
+        }
 
         private void Awake()
         {
@@ -45,25 +60,18 @@ namespace VertigoDemo
             ui_button_leave.onClick.RemoveListener(HandleLeavePressed);
         }
 
-        public void BindZone(int zone, WheelDefinition wheel)
+        public void BindZone(int zone, ZoneProfile profile, WheelDefinitionModel wheel)
         {
-            ZoneType type = ZoneRules.GetZoneType(zone);
-            ui_text_zone_value.text = "ZONE " + zone;
-            ui_text_zone_type_value.text = type == ZoneType.Normal
-                ? "RISK ZONE"
-                : type == ZoneType.Safe ? "SAFE ZONE" : "SUPER ZONE";
-            ui_text_zone_type_value.color = type == ZoneType.Normal
-                ? new Color(1f, 0.46f, 0.2f)
-                : type == ZoneType.Safe
-                    ? new Color(0.52f, 0.84f, 1f)
-                    : new Color(1f, 0.78f, 0.12f);
+            ui_text_zone_value.text = localization.Format(LocalizationKeys.ZoneLabel, zone);
+            ui_text_zone_type_value.text = localization.Get(profile.TitleKey);
+            ui_text_zone_type_value.color = profile.AccentColor;
 
-            ui_wheel_view.Bind(wheel, zone);
-            ui_zone_trail_view.Bind(zone);
+            ui_wheel_view.Bind(wheel, zone, rewardRules);
+            ui_zone_trail_view.Bind(zone, zoneRules);
             bool newZone = zone != lastBoundZone;
             lastBoundZone = zone;
 
-            if (newZone && type == ZoneType.Super)
+            if (newZone && profile.HasEntranceTransition)
             {
                 ui_golden_transition_view.Play(
                     zone,
@@ -86,24 +94,29 @@ namespace VertigoDemo
                 .SetTarget(zoneTransform);
         }
 
-        public void BindRewards(IReadOnlyList<CollectedReward> rewards)
+        public void BindRewards(IReadOnlyList<CollectedRewardModel> rewards)
         {
             ui_run_loot_panel_view.Bind(rewards);
         }
 
-        public void SetInteraction(bool spinning, bool canLeave)
+        public void SetBusy(bool isBusy, bool canLeave)
         {
-            requestedSpinning = spinning;
+            requestedBusy = isBusy;
             requestedCanLeave = canLeave;
             ApplyInteractionState();
         }
 
+        public void SpinWheel(int selectedIndex, Action onComplete)
+        {
+            ui_wheel_view.Spin(selectedIndex, onComplete);
+        }
+
         public void ShowReward(
-            RewardDefinition reward,
+            RewardDefinitionModel reward,
             int amount,
             Action continueAction)
         {
-            ui_result_popup_view.ShowReward(
+            ui_popup_view.ShowReward(
                 reward,
                 amount,
                 ui_run_loot_panel_view.FindFlightTarget(reward),
@@ -116,22 +129,20 @@ namespace VertigoDemo
             int reviveCost,
             bool canAffordRevive,
             Action giveUpAction,
-            Action currencyReviveAction,
-            Action rewardedReviveAction)
+            Action currencyReviveAction)
         {
-            ui_bomb_popup_view.Show(
+            ui_popup_view.ShowBomb(
                 bombIcon,
                 reviveCurrencyIcon,
                 reviveCost,
                 canAffordRevive,
                 giveUpAction,
-                currencyReviveAction,
-                rewardedReviveAction);
+                currencyReviveAction);
         }
 
         public void PlayBombImpact()
         {
-            ui_bomb_popup_view.PlayImpact();
+            ui_popup_view.PlayImpact();
         }
 
         public void ShowCollected(
@@ -139,19 +150,13 @@ namespace VertigoDemo
             int rewardKinds,
             Action restartAction)
         {
-            ui_result_popup_view.ShowCollected(chestIcon, rewardKinds, restartAction);
-        }
-
-        public void HideResult()
-        {
-            ui_bomb_popup_view.ResetState();
-            ui_result_popup_view.Hide();
+            ui_popup_view.ShowCollected(chestIcon, rewardKinds, restartAction);
         }
 
         private void ApplyInteractionState()
         {
             bool transitionPlaying = ui_golden_transition_view.IsPlaying;
-            bool canSpin = !requestedSpinning && !transitionPlaying;
+            bool canSpin = !requestedBusy && !transitionPlaying;
             bool canLeave = requestedCanLeave && !transitionPlaying;
             ui_button_spin.interactable = canSpin;
             ui_button_leave.interactable = canLeave;
@@ -161,14 +166,10 @@ namespace VertigoDemo
                     (RectTransform)ui_button_leave.transform.parent;
                 DOTween.Kill(leaveAnimator, false);
                 leaveAnimator.localScale = Vector3.one;
-                leaveAnimator
-                    .DOPunchScale(
-                        new Vector3(0.10f, 0.10f, 0f),
-                        0.34f,
-                        8,
-                        0.55f)
-                    .SetUpdate(true)
-                    .SetTarget(leaveAnimator);
+                UiTween.PunchScale(
+                    leaveAnimator,
+                    new Vector3(0.10f, 0.10f, 0f),
+                    0.34f);
             }
 
             leaveWasAvailable = canLeave;
@@ -177,14 +178,10 @@ namespace VertigoDemo
         private void HandleGoldenTransitionComplete()
         {
             ApplyInteractionState();
-            ui_text_zone_type_value.rectTransform
-                .DOPunchScale(
-                    new Vector3(0.12f, 0.12f, 0f),
-                    0.28f,
-                    8,
-                    0.55f)
-                .SetUpdate(true)
-                .SetTarget(ui_text_zone_type_value.rectTransform);
+            UiTween.PunchScale(
+                ui_text_zone_type_value.rectTransform,
+                new Vector3(0.12f, 0.12f, 0f),
+                0.28f);
         }
 
         private void HandleSpinPressed()
@@ -196,6 +193,5 @@ namespace VertigoDemo
         {
             LeavePressed?.Invoke();
         }
-
     }
 }

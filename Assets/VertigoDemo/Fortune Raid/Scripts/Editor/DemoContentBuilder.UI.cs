@@ -9,7 +9,7 @@ namespace VertigoDemo.Editor
 {
     public static partial class DemoContentBuilder
     {
-        private static GameObject BuildGamePrefab(WheelCatalog catalog)
+        private static GameObject BuildGamePrefab(WheelCatalogModel catalog)
         {
             GameObject root = new GameObject(
                 "ui_screen_game",
@@ -18,7 +18,7 @@ namespace VertigoDemo.Editor
                 typeof(CanvasScaler),
                 typeof(GraphicRaycaster),
                 typeof(GameScreenView),
-                typeof(GameController));
+                typeof(GameRoot));
             RectTransform rootRect = root.GetComponent<RectTransform>();
             rootRect.anchorMin = Vector2.zero;
             rootRect.anchorMax = Vector2.one;
@@ -76,8 +76,7 @@ namespace VertigoDemo.Editor
             CanvasGroup giveUpCanvasGroup = giveUpButton.gameObject.AddComponent<CanvasGroup>();
             CanvasGroup currencyReviveCanvasGroup =
                 currencyReviveButton.gameObject.AddComponent<CanvasGroup>();
-            CanvasGroup rewardedReviveCanvasGroup =
-                rewardedReviveButton.gameObject.AddComponent<CanvasGroup>();
+            rewardedReviveButton.gameObject.SetActive(false);
             Image bombImpactFlash = DemoUiFactory.Image(
                 "ui_image_bomb_impact_flash_value", root.transform, null,
                 new Color(0.92f, 0.015f, 0.01f, 0f),
@@ -104,7 +103,7 @@ namespace VertigoDemo.Editor
             Set(zoneTrailSo, "ui_sprite_zone_current", Sprite("ui_card_panel_zone_current_white.png"));
             Set(zoneTrailSo, "ui_sprite_zone_coming", Sprite("ui_card_panel_zone_coming.png"));
             Set(zoneTrailSo, "ui_sprite_zone_safe", Sprite("ui_card_panel_zone_current.png"));
-            Set(zoneTrailSo, "ui_sprite_zone_super", Sprite("ui_card_panel_zone_super.png"));
+            Set(zoneTrailSo, "ui_sprite_zone_golden", Sprite("ui_card_panel_zone_super.png"));
             zoneTrailSo.ApplyModifiedPropertiesWithoutUndo();
 
             RunLootPanelView runLootPanelView =
@@ -134,49 +133,40 @@ namespace VertigoDemo.Editor
                 superTransitionPunchline);
             goldenTransitionSo.ApplyModifiedPropertiesWithoutUndo();
 
-            ResultPopupView resultPopupView = popup.AddComponent<ResultPopupView>();
-            SerializedObject resultPopupSo = new SerializedObject(resultPopupView);
-            Set(resultPopupSo, "ui_transform_popup_animator", popupAnimator);
-            Set(resultPopupSo, "ui_canvas_group_result", resultCanvasGroup);
-            Set(resultPopupSo, "ui_image_popup_panel_value", popupPanel);
-            Set(resultPopupSo, "ui_image_result_card_value", resultCard);
-            Set(resultPopupSo, "ui_image_result_card_glow_value", resultCardGlow);
-            Set(resultPopupSo, "ui_image_result_card_border_value", resultCardBorder);
-            Set(resultPopupSo, "ui_text_result_title_value", resultTitle);
-            Set(resultPopupSo, "ui_text_result_message_value", resultMessage);
-            Set(resultPopupSo, "ui_text_result_reward_value", resultReward);
-            Set(resultPopupSo, "ui_image_result_icon_value", resultIcon);
-            Set(resultPopupSo, "ui_reward_fly_view", rewardFlyView);
-            Set(resultPopupSo, "ui_button_result_primary", resultButton);
-            Set(resultPopupSo, "ui_text_result_primary_value", resultButtonText);
-            Set(resultPopupSo, "ui_panel_bomb_actions", bombActions);
-            Set(resultPopupSo, "ui_sprite_result_speed_lines", Sprite("star_flash_alpha.png"));
-            Set(resultPopupSo, "ui_sprite_result_special_shine", Sprite("ui_vfx_offer_shine.tga"));
-            resultPopupSo.ApplyModifiedPropertiesWithoutUndo();
+            BombActionsView bombActionsView = bombActions.AddComponent<BombActionsView>();
+            SerializedObject bombActionsSo = new SerializedObject(bombActionsView);
+            Set(bombActionsSo, "ui_button_bomb_give_up", giveUpButton);
+            Set(bombActionsSo, "ui_button_bomb_currency_revive", currencyReviveButton);
+            Set(bombActionsSo, "ui_button_bomb_rewarded_revive", rewardedReviveButton);
+            Set(bombActionsSo, "ui_canvas_group_bomb_give_up", giveUpCanvasGroup);
+            Set(bombActionsSo, "ui_canvas_group_bomb_currency_revive", currencyReviveCanvasGroup);
+            Set(bombActionsSo, "ui_image_bomb_revive_currency_value", reviveCurrencyIcon);
+            Set(bombActionsSo, "ui_text_bomb_revive_cost_value", reviveCostText);
+            Set(bombActionsSo, "ui_text_bomb_give_up_label", giveUpButton.GetComponentInChildren<TMP_Text>(true));
+            Set(bombActionsSo, "ui_text_bomb_revive_label", currencyReviveButton.GetComponentInChildren<TMP_Text>(true));
+            bombActionsSo.ApplyModifiedPropertiesWithoutUndo();
 
-            BombPopupView bombPopupView = bombActions.AddComponent<BombPopupView>();
-            SerializedObject bombPopupSo = new SerializedObject(bombPopupView);
-            Set(bombPopupSo, "ui_result_popup_view", resultPopupView);
-            Set(bombPopupSo, "ui_wheel_view", wheelView);
-            Set(bombPopupSo, "ui_button_bomb_give_up", giveUpButton);
-            Set(bombPopupSo, "ui_button_bomb_currency_revive", currencyReviveButton);
-            Set(bombPopupSo, "ui_button_bomb_rewarded_revive", rewardedReviveButton);
-            Set(bombPopupSo, "ui_canvas_group_bomb_give_up", giveUpCanvasGroup);
-            Set(
-                bombPopupSo,
-                "ui_canvas_group_bomb_currency_revive",
-                currencyReviveCanvasGroup);
-            Set(
-                bombPopupSo,
-                "ui_canvas_group_bomb_rewarded_revive",
-                rewardedReviveCanvasGroup);
-            Set(
-                bombPopupSo,
-                "ui_image_bomb_revive_currency_value",
-                reviveCurrencyIcon);
-            Set(bombPopupSo, "ui_text_bomb_revive_cost_value", reviveCostText);
-            Set(bombPopupSo, "ui_image_bomb_impact_flash_value", bombImpactFlash);
-            bombPopupSo.ApplyModifiedPropertiesWithoutUndo();
+            PopupView popupView = popup.AddComponent<PopupView>();
+            SerializedObject popupSo = new SerializedObject(popupView);
+            Set(popupSo, "ui_transform_popup_animator", popupAnimator);
+            Set(popupSo, "ui_canvas_group_result", resultCanvasGroup);
+            Set(popupSo, "ui_image_popup_panel_value", popupPanel);
+            Set(popupSo, "ui_image_result_card_value", resultCard);
+            Set(popupSo, "ui_image_result_card_glow_value", resultCardGlow);
+            Set(popupSo, "ui_image_result_card_border_value", resultCardBorder);
+            Set(popupSo, "ui_text_result_title_value", resultTitle);
+            Set(popupSo, "ui_text_result_message_value", resultMessage);
+            Set(popupSo, "ui_text_result_reward_value", resultReward);
+            Set(popupSo, "ui_image_result_icon_value", resultIcon);
+            Set(popupSo, "ui_reward_fly_view", rewardFlyView);
+            Set(popupSo, "ui_button_result_primary", resultButton);
+            Set(popupSo, "ui_text_result_primary_value", resultButtonText);
+            Set(popupSo, "ui_bomb_actions_view", bombActionsView);
+            Set(popupSo, "ui_sprite_result_speed_lines", Sprite("star_flash_alpha.png"));
+            Set(popupSo, "ui_sprite_result_special_shine", Sprite("ui_vfx_offer_shine.tga"));
+            Set(popupSo, "ui_wheel_view", wheelView);
+            Set(popupSo, "ui_image_bomb_impact_flash_value", bombImpactFlash);
+            popupSo.ApplyModifiedPropertiesWithoutUndo();
 
             GameScreenView screen = root.GetComponent<GameScreenView>();
             SerializedObject screenSo = new SerializedObject(screen);
@@ -185,22 +175,21 @@ namespace VertigoDemo.Editor
             Set(screenSo, "ui_text_zone_type_value", zoneTypeText);
             Set(screenSo, "ui_button_spin", spinButton);
             Set(screenSo, "ui_button_leave", leaveButton);
-            Set(screenSo, "ui_result_popup_view", resultPopupView);
-            Set(screenSo, "ui_bomb_popup_view", bombPopupView);
+            Set(screenSo, "ui_popup_view", popupView);
             Set(screenSo, "ui_run_loot_panel_view", runLootPanelView);
             Set(screenSo, "ui_zone_trail_view", zoneTrailView);
             Set(screenSo, "ui_golden_transition_view", goldenTransitionView);
             screenSo.ApplyModifiedPropertiesWithoutUndo();
 
-            GameController controller = root.GetComponent<GameController>();
-            SerializedObject controllerSo = new SerializedObject(controller);
-            Set(controllerSo, "wheelCatalog", catalog);
-            Set(controllerSo, "gameScreenView", screen);
-            Set(controllerSo, "bombIcon", Sprite("ui_card_icon_death.png"));
-            Set(controllerSo, "collectedChestIcon", Sprite("UI_icon_chest_gold_nolight.png"));
-            Set(controllerSo, "reviveCurrencyDefinition",
-                AssetDatabase.LoadAssetAtPath<RewardDefinition>(Data + "/reward_gold.asset"));
-            controllerSo.ApplyModifiedPropertiesWithoutUndo();
+            GameRoot gameRoot = root.GetComponent<GameRoot>();
+            SerializedObject gameRootSo = new SerializedObject(gameRoot);
+            Set(gameRootSo, "wheelCatalog", catalog);
+            Set(gameRootSo, "gameScreenView", screen);
+            Set(gameRootSo, "bombIcon", Sprite("ui_card_icon_death.png"));
+            Set(gameRootSo, "collectedChestIcon", Sprite("UI_icon_chest_gold_nolight.png"));
+            Set(gameRootSo, "reviveCurrencyDefinition",
+                AssetDatabase.LoadAssetAtPath<RewardDefinitionModel>(Data + "/reward_gold.asset"));
+            gameRootSo.ApplyModifiedPropertiesWithoutUndo();
 
             GameObject eventSystem = new GameObject("ui_system_events", typeof(EventSystem), typeof(StandaloneInputModule));
             eventSystem.transform.SetParent(root.transform, false);
@@ -212,12 +201,12 @@ namespace VertigoDemo.Editor
             return prefab;
         }
 
-        private static int CountUniqueRewards(WheelCatalog catalog)
+        private static int CountUniqueRewards(WheelCatalogModel catalog)
         {
-            HashSet<RewardDefinition> rewards = new HashSet<RewardDefinition>();
+            HashSet<RewardDefinitionModel> rewards = new HashSet<RewardDefinitionModel>();
             for (int zone = 1; zone <= 90; zone++)
             {
-                WheelDefinition wheel = catalog.ForZone(zone);
+                WheelDefinitionModel wheel = catalog.ForZone(zone);
                 if (wheel == null)
                 {
                     continue;
@@ -225,7 +214,7 @@ namespace VertigoDemo.Editor
 
                 for (int i = 0; i < wheel.Slices.Count; i++)
                 {
-                    WheelSliceDefinition slice = wheel.Slices[i];
+                    WheelSliceDefinitionModel slice = wheel.Slices[i];
                     if (slice != null && !slice.IsBomb && slice.Reward != null)
                     {
                         rewards.Add(slice.Reward);
