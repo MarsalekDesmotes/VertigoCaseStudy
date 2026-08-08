@@ -42,7 +42,7 @@ Gameplay video: [Delivery/Video/fortune_raid_demo.mp4](Delivery/Video/fortune_ra
 |----------|------|
 | Screenshots 16:9 / 20:9 / 4:3 | [Delivery/Screenshots/](Delivery/Screenshots/) |
 | Gameplay video | [Delivery/Video/fortune_raid_demo.mp4](Delivery/Video/fortune_raid_demo.mp4) |
-| Android APK | `Delivery/Builds/FortuneRaid.apk` (local / release asset; `*.apk` is gitignored) |
+| Android APK | [Delivery/Builds/FortuneRaid.apk](Delivery/Builds/FortuneRaid.apk) |
 
 ### Editor helpers
 

@@ -10,7 +10,13 @@
 *.sln
 *.user
 *.apk
+!/Delivery/Builds/*.apk
 *.aab
 *.keystore
 *.jks
 crashlytics-build.properties
+
+# Local delivery rebuild noise (keep Screenshots/ + Video/ tracked)
+/Delivery/Builds/Windows/
+/Delivery/*.log
+/Delivery/ui_batch_report.txt
